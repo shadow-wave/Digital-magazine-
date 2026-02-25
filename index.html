@@ -16,9 +16,6 @@
     <!-- Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- HTML2PDF Library for High-Quality PDF Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -29,6 +26,7 @@
                         'gold': '#c29a5b',      
                         'gold-light': '#dfc28f',
                         'paper': '#ffffff',     
+                        'paper-alt': '#fafafa', 
                         'ink': '#334155',       
                     },
                     fontFamily: {
@@ -132,48 +130,75 @@
         .glass-input:focus { border-color: #0f172a; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
 
         /* Mobile Layout tweaks */
-        @media (max-width: 768px) {
-            .page-wrapper { width: 96%; aspect-ratio: auto; min-height: 600px; }
+        @media (max-width: 850px) {
+            .page-wrapper { width: 96%; min-height: auto; height: auto; border-radius: 8px; }
             .page-inner { margin: 25px; min-height: auto; }
             .admin-active .page-inner { margin-top: 80px !important; }
             .editorial-columns { column-count: 1; }
             .pos-left, .pos-right { float: none; width: 100%; margin: 0 0 2rem 0; }
+            .admin-toolbar-btns { flex-wrap: wrap; justify-content: center; }
         }
 
-        @media (min-width: 769px) { .editorial-columns { column-count: 2; } }
+        @media (min-width: 851px) { .editorial-columns { column-count: 2; } }
 
-        /* --- PERFECT PRINT STYLES --- */
+        /* --- STRICT A4 NATIVE PRINT STYLES (Fixes Hindi Font Issues) --- */
         @media print {
-            @page { size: A4; margin: 0; }
-            html, body { height: auto !important; overflow: visible !important; display: block !important; background: #ffffff !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: A4 portrait; margin: 0; }
             
-            nav, aside, .no-print, #adminModal, #toast, #loader, #editModal, .admin-toolbar { display: none !important; }
+            html, body { 
+                width: 210mm !important; 
+                height: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: #ffffff !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            
+            nav, aside, .no-print, #adminModal, #exportModal, #toast, #loader, #editModal, .admin-toolbar { 
+                display: none !important; 
+            }
             
             .flex-1, .flex-col, .lg\:flex-row { display: block !important; }
             #printArea { position: static !important; display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
             #pagesContainer { display: block !important; width: 100% !important; gap: 0 !important; }
             
             .page-wrapper { 
-                position: relative !important; width: 210mm !important; height: 297mm !important; 
-                margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; 
-                background-color: #ffffff !important; page-break-after: always !important; 
-                break-after: page !important; border: none !important; float: none !important;
+                position: relative !important; 
+                width: 210mm !important; 
+                height: 297mm !important; 
+                max-height: 297mm !important;
+                margin: 0 !important; 
+                box-shadow: none !important; 
+                border-radius: 0 !important; 
+                background-color: #ffffff !important; 
+                page-break-after: always !important; 
+                page-break-inside: avoid !important;
+                break-after: page !important; 
+                border: none !important; 
+                float: none !important;
+                overflow: hidden !important;
             }
-            .page-inner { margin: 25mm 20mm 25mm 20mm !important; min-height: auto !important;}
-            .admin-active .page-inner { margin-top: 25mm !important; } /* Reset margin for print */
+            
+            .page-inner { margin: 20mm !important; min-height: auto !important; height: calc(297mm - 40mm) !important;}
+            .admin-active .page-inner { margin-top: 20mm !important; } 
 
             .editorial-columns { column-count: 2 !important; column-gap: 12mm !important; }
+            
             .pos-left { float: left !important; width: 45% !important; margin-right: 8mm !important; }
             .pos-right { float: right !important; width: 45% !important; margin-left: 8mm !important; }
+            
+            img { page-break-inside: avoid !important; max-width: 100% !important; }
+            .doha-block, .trans-block { page-break-inside: avoid !important; }
         }
 
-        .fade-in { animation: fadeIn 0.5s ease-out; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="flex flex-col min-h-screen text-navy">
 
-    <!-- Premium Navbar - Minimalist -->
+    <!-- Premium Navbar -->
     <nav class="sticky top-0 bg-white shadow-sm z-50 border-b border-gray-200 no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -187,13 +212,18 @@
             <!-- Action Buttons -->
             <div class="flex gap-2 md:gap-3 items-center flex-wrap justify-end">
                 
-                <!-- Admin Status Indicator -->
-                <div id="adminStatusBadge" class="hidden items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full text-xs font-bold mr-2">
+                <div id="adminStatusBadge" class="hidden items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full text-xs font-bold mr-1">
                     <span class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
                     Admin Active
+                </div>
+
+                <div id="exportBtnWrapper" class="hidden">
+                    <button onclick="toggleExportModal()" class="bg-navy hover:bg-navy-light text-white px-4 py-2 rounded text-xs font-bold flex items-center gap-2 transition shadow-md">
+                        <i class="ph ph-export text-lg"></i> <span class="hidden sm:inline">Export Tools</span>
+                    </button>
                 </div>
 
                 <button id="adminBtn" onclick="openAdminModal()" class="p-2 text-gray-400 hover:text-navy transition rounded-full hover:bg-gray-100" title="Admin Login">
@@ -203,41 +233,29 @@
                 <button id="logoutBtn" onclick="logoutAdmin()" class="hidden p-2 text-red-400 hover:text-red-600 transition rounded-full hover:bg-red-50" title="Logout Admin">
                     <i class="ph ph-sign-out text-xl"></i>
                 </button>
-
-                <button id="wordBtn" onclick="downloadAsWord()" class="hidden border border-gray-300 hover:bg-gray-50 text-navy px-3 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition" title="Export to MS Word">
-                    <i class="ph ph-file-doc text-lg"></i> <span class="hidden sm:inline">Word</span>
-                </button>
-                
-                <button onclick="downloadPDF()" class="bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition shadow-sm" title="High Quality PDF">
-                    <i class="ph ph-download-simple text-lg"></i> <span class="hidden md:inline">Download PDF</span>
-                </button>
-                
-                <button onclick="window.print()" class="bg-navy hover:bg-navy-light text-white px-4 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition shadow-md">
-                    <i class="ph ph-printer text-lg"></i> <span class="hidden md:inline">Print</span>
-                </button>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Layout -->
-    <div class="flex-1 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
+    <div class="flex-1 w-full max-w-[1400px] mx-auto flex flex-col xl:flex-row gap-8 p-4 lg:p-8">
         
         <!-- Left Sidebar: Submission Form -->
-        <aside class="w-full lg:w-[380px] flex-shrink-0 no-print">
+        <aside class="w-full xl:w-[380px] flex-shrink-0 no-print">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden sticky top-24">
                 
-                <button onclick="toggleMobileForm()" class="w-full p-5 bg-navy text-white flex justify-between items-center lg:cursor-default group">
+                <button onclick="toggleMobileForm()" class="w-full p-5 bg-navy text-white flex justify-between items-center xl:cursor-default group">
                     <div class="flex items-center gap-3">
                         <i class="ph ph-pen-nib text-xl text-gold-light"></i>
                         <div class="text-left">
                             <h2 class="font-bold font-hindi text-lg tracking-wide">रचना भेजें</h2>
-                            <p class="text-[10px] text-gray-300 uppercase tracking-wider font-eng lg:hidden">Submit Article</p>
+                            <p class="text-[10px] text-gray-300 uppercase tracking-wider font-eng xl:hidden">Submit Article</p>
                         </div>
                     </div>
-                    <i id="formArrow" class="ph ph-caret-down lg:hidden transition-transform duration-300"></i>
+                    <i id="formArrow" class="ph ph-caret-down xl:hidden transition-transform duration-300"></i>
                 </button>
                 
-                <div id="formContainer" class="p-6 hidden lg:block space-y-5">
+                <div id="formContainer" class="p-6 hidden xl:block space-y-5">
                     <form id="magazineForm" class="space-y-4">
                         <div>
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">श्रेणी (Category)</label>
@@ -253,8 +271,8 @@
                                 <input type="text" id="title" class="glass-input font-bold text-lg" placeholder="शीर्षक दर्ज करें...">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">नाम (Author) <span class="text-red-500">*</span></label>
-                                <input type="text" id="author" class="glass-input" placeholder="आपका नाम...">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">छात्र का नाम (Student Name) <span class="text-red-500">*</span></label>
+                                <input type="text" id="author" class="glass-input" placeholder="छात्र का नाम और कक्षा...">
                             </div>
                         </div>
 
@@ -298,7 +316,7 @@
             <div id="pagesContainer" class="w-full flex flex-col items-center gap-10 pb-12">
                 
                 <!-- Minimalist Cover Page -->
-                <div class="page-wrapper cover-page bg-white justify-center items-center relative overflow-hidden border-8 border-navy m-2">
+                <div class="page-wrapper cover-page bg-white justify-center items-center relative overflow-hidden border-[10px] border-navy m-2">
                     <div class="absolute inset-4 border border-gray-200 z-10 pointer-events-none"></div>
                     <div class="z-20 text-center flex flex-col items-center w-full h-full justify-center px-12 py-20 bg-white">
                         
@@ -307,7 +325,7 @@
                             <div class="h-px w-24 bg-gold mx-auto mt-4"></div>
                         </div>
                         
-                        <h1 class="text-7xl md:text-[7.5rem] font-black mb-0 font-hindi text-navy tracking-tight" style="line-height: 1;">प्रेरणा</h1>
+                        <h1 class="text-[6rem] md:text-[8rem] font-black mb-0 font-hindi text-navy tracking-tight" style="line-height: 1;">प्रेरणा</h1>
                         <p class="text-xl md:text-2xl font-eng text-gray-500 mt-4 italic tracking-widest">Prerana</p>
                         
                         <div class="my-12">
@@ -326,6 +344,54 @@
                 <!-- Articles injected here -->
             </div>
         </main>
+    </div>
+
+    <!-- Export Manager Modal (Admin Only) -->
+    <div id="exportModal" class="hidden fixed inset-0 bg-navy/80 z-[120] flex items-center justify-center p-4 backdrop-blur-sm no-print">
+        <div class="bg-white rounded-xl w-full max-w-md shadow-2xl fade-in overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-navy font-eng flex items-center gap-2"><i class="ph ph-export text-gold"></i> Export Manager</h3>
+                <button onclick="toggleExportModal()" class="text-gray-400 hover:text-red-500"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Native PDF (Best Quality) -->
+                <button onclick="downloadPDF()" class="w-full flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 transition group text-left relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-bl">RECOMMENDED</div>
+                    <div class="bg-indigo-100 p-3 rounded-full text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition"><i class="ph ph-file-pdf text-2xl"></i></div>
+                    <div>
+                        <h4 class="font-bold text-navy text-sm">Save as PDF</h4>
+                        <p class="text-[10px] text-gray-500">Perfect Hindi rendering</p>
+                    </div>
+                </button>
+
+                <button onclick="downloadAsWord()" class="w-full flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition group text-left">
+                    <div class="bg-blue-100 p-3 rounded-full text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition"><i class="ph ph-file-doc text-2xl"></i></div>
+                    <div>
+                        <h4 class="font-bold text-navy text-sm">MS Word</h4>
+                        <p class="text-[10px] text-gray-500">Editable Text (No Images)</p>
+                    </div>
+                </button>
+                
+                <button onclick="downloadAsCSV()" class="w-full flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-200 transition group text-left">
+                    <div class="bg-green-100 p-3 rounded-full text-green-600 group-hover:bg-green-600 group-hover:text-white transition"><i class="ph ph-file-csv text-2xl"></i></div>
+                    <div>
+                        <h4 class="font-bold text-navy text-sm">Excel / CSV</h4>
+                        <p class="text-[10px] text-gray-500">Raw content table</p>
+                    </div>
+                </button>
+
+                <button onclick="downloadAsJSON()" class="w-full flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition group text-left">
+                    <div class="bg-gray-200 p-3 rounded-full text-gray-700 group-hover:bg-gray-700 group-hover:text-white transition"><i class="ph ph-database text-2xl"></i></div>
+                    <div>
+                        <h4 class="font-bold text-navy text-sm">JSON Backup</h4>
+                        <p class="text-[10px] text-gray-500">Full database archive</p>
+                    </div>
+                </button>
+
+            </div>
+        </div>
     </div>
 
     <!-- Edit Modal (Minimal) -->
@@ -347,7 +413,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">लेखक</label>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">छात्र का नाम</label>
                         <input type="text" id="editAuthor" class="glass-input py-2 text-sm mt-1">
                     </div>
                 </div>
@@ -445,6 +511,11 @@
             fa.classList.toggle('rotate-180');
         };
 
+        window.toggleExportModal = () => {
+            const mod = document.getElementById('exportModal');
+            mod.classList.toggle('hidden');
+        };
+
         window.toggleLoader = (show, txt="Loading") => { 
             document.getElementById('loaderText').innerText = txt;
             document.getElementById('loader').classList.toggle('hidden', !show); 
@@ -526,7 +597,7 @@
                 if(isAdmin) {
                     adminClass = 'admin-active';
                     adminBar = `
-                    <div class="admin-toolbar absolute top-0 left-0 w-full bg-navy/95 backdrop-blur text-white px-4 py-2.5 flex flex-wrap justify-between items-center no-print z-[60] border-b-2 border-gold shadow-md">
+                    <div class="admin-toolbar absolute top-0 left-0 w-full bg-navy/95 backdrop-blur text-white px-4 py-2.5 flex flex-wrap justify-between items-center no-print z-[60] border-b border-gray-600 shadow-md">
                         <div class="flex items-center gap-2">
                             <i class="ph ph-wrench text-gold text-lg"></i>
                             <span class="text-xs font-bold uppercase tracking-widest text-white">Admin Controls (Pg ${index + 1})</span>
@@ -554,16 +625,20 @@
                         </div>
                         
                         <!-- Title Area -->
-                        <div class="text-center mb-12 px-4">
-                            <h2 class="text-4xl md:text-5xl font-black text-navy font-hindi leading-tight mb-4">${article.title}</h2>
-                            <div class="flex items-center justify-center gap-4">
-                                <span class="text-xs font-hindi font-bold text-gray-500 tracking-wider">रचना • ${article.author}</span>
-                            </div>
+                        <div class="text-center mb-10 px-4">
+                            <h2 class="text-4xl md:text-5xl font-black text-navy font-hindi leading-tight">${article.title}</h2>
                         </div>
 
                         <!-- Content Flow -->
                         <div class="flex-1 overflow-hidden relative">
                             ${contentHtml}
+                            
+                            <!-- Student Name placed at the Bottom Right -->
+                            <div class="mt-8 flex flex-col items-end justify-end w-full border-t border-gray-100 pt-4">
+                                <span class="text-[10px] uppercase tracking-widest text-gray-400 font-eng mb-1">Student Name</span>
+                                <span class="text-lg font-hindi font-bold text-navy">${article.author}</span>
+                                <div class="h-px w-12 bg-gold mt-2"></div>
+                            </div>
                         </div>
 
                         <!-- Footer -->
@@ -619,7 +694,7 @@
                 document.getElementById('logoutBtn').classList.remove('hidden');
                 document.getElementById('adminStatusBadge').classList.remove('hidden');
                 document.getElementById('adminStatusBadge').classList.add('flex');
-                document.getElementById('wordBtn').classList.remove('hidden');
+                document.getElementById('exportBtnWrapper').classList.remove('hidden'); 
                 
                 renderMagazine();
                 showToast("Admin Mode Activated", "success");
@@ -632,7 +707,7 @@
             document.getElementById('logoutBtn').classList.add('hidden');
             document.getElementById('adminStatusBadge').classList.add('hidden');
             document.getElementById('adminStatusBadge').classList.remove('flex');
-            document.getElementById('wordBtn').classList.add('hidden');
+            document.getElementById('exportBtnWrapper').classList.add('hidden');
             renderMagazine();
             showToast("Logged out successfully");
         };
@@ -732,44 +807,20 @@
             toggleLoader(false); 
         };
 
-        // --- EXPORT PDF USING HTML2PDF (HIGH QUALITY) ---
+        // --- NEW: PDF EXPORT SOLUTION ---
+        // Native window.print is the ONLY 100% reliable way to get perfect Hindi typography
         window.downloadPDF = () => {
-            toggleLoader(true, "Generating PDF...");
-            const element = document.getElementById('pagesContainer');
-            
-            // Hide Admin tools before generating PDF
-            const adminBars = document.querySelectorAll('.admin-toolbar');
-            adminBars.forEach(bar => bar.style.display = 'none');
-            
-            // Remove margin-top offset for printing
-            const wrappers = document.querySelectorAll('.page-wrapper');
-            wrappers.forEach(w => w.classList.remove('admin-active'));
-
-            const opt = {
-                margin:       0,
-                filename:     'Prerana_Magazine_2025.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Restore Admin tools
-                adminBars.forEach(bar => bar.style.display = 'flex');
-                if(isAdmin) wrappers.forEach(w => w.classList.add('admin-active'));
-                toggleLoader(false);
-                showToast("PDF Downloaded successfully!", "success");
-            }).catch(err => {
-                adminBars.forEach(bar => bar.style.display = 'flex');
-                if(isAdmin) wrappers.forEach(w => w.classList.add('admin-active'));
-                toggleLoader(false);
-                showToast("Error creating PDF", "error");
-            });
+            toggleExportModal(); 
+            showToast("Tip: Select 'Save as PDF' as destination in the Print window.", "info");
+            setTimeout(() => {
+                window.print();
+            }, 2000);
         };
 
-        // --- EXPORT WORD (TEXT ONLY/BASIC IMAGES) ---
+        // --- EXPORT WORD (TEXT ONLY) ---
         window.downloadAsWord = () => {
-            let html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><style>body{font-family:'Lora', 'Mangal', serif;} .title{color:#0f172a;font-size:28pt;font-weight:bold;text-align:center; margin-bottom:5px;} .author{text-align:center;font-style:italic; color:#64748b; margin-bottom:30px; font-size:12pt} .cat{color:#c29a5b;font-weight:bold; border-bottom:1px solid #e2e8f0; padding-bottom:5px; text-transform:uppercase; font-size:10pt}</style></head><body>`;
+            toggleExportModal();
+            let html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><style>body{font-family:'Lora', 'Mangal', serif;} .title{color:#0f172a;font-size:28pt;font-weight:bold;text-align:center; margin-bottom:20px;} .author{text-align:right; color:#0f172a; margin-top:30px; font-size:14pt; font-weight:bold;} .author-label{text-align:right; font-size:10pt; color:#64748b;} .cat{color:#c29a5b;font-weight:bold; border-bottom:1px solid #e2e8f0; padding-bottom:5px; text-transform:uppercase; font-size:10pt}</style></head><body>`;
             
             html += `<div style="text-align:center; page-break-after:always; padding-top:150px;">
                         <h2 style="color:#c29a5b; letter-spacing:3px; text-transform:uppercase">Department of Hindi</h2>
@@ -778,8 +829,7 @@
                      </div>`;
 
             articlesList.forEach(a => {
-                html += `<div style="page-break-after:always"><p class="cat">${a.category}</p><p class="title">${a.title}</p><p class="author">रचना: ${a.author}</p>`;
-                if(a.image) html += `<div style="text-align:center; margin-bottom:20px"><img src="${a.image}" width="450"></div>`;
+                html += `<div style="page-break-after:always"><p class="cat">${a.category}</p><p class="title">${a.title}</p>`;
                 
                 if (a.category === "अनुवाद (Translation)") {
                     const lines = a.content.split('\n').filter(l=>l.trim());
@@ -794,11 +844,45 @@
                      html += `<div style="text-align:justify; line-height:1.6; font-size:11pt">` + a.content.split('\n').map(l=>`<p>${l}</p>`).join('') + `</div>`;
                 }
                 
+                // Added Author at the bottom
+                html += `<div style="margin-top:30px; text-align:right;"><p class="author-label">Student Name</p><p class="author">${a.author}</p></div>`;
                 html += `</div>`;
             });
             html += `</body></html>`;
             const b = new Blob(['\ufeff', html], {type:'application/msword'});
-            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Prerana_Magazine_Word_Export.doc"; a.click();
+            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Prerana_Magazine.doc"; a.click();
+            showToast("Word Document Downloaded", "success");
+        };
+
+        // --- EXPORT RAW CSV (EXCEL) ---
+        window.downloadAsCSV = () => {
+            toggleExportModal();
+            let csvContent = "Category,Title,Student_Name,Content,Has_Image\n";
+            
+            articlesList.forEach(a => {
+                const escapeCSV = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+                const hasImg = a.image ? "Yes" : "No";
+                csvContent += `${escapeCSV(a.category)},${escapeCSV(a.title)},${escapeCSV(a.author)},${escapeCSV(a.content)},${hasImg}\n`;
+            });
+
+            const blob = new Blob(['\ufeff', csvContent], {type: 'text/csv;charset=utf-8;'}); 
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Prerana_Magazine_Data.csv";
+            link.click();
+            showToast("Excel CSV Downloaded", "success");
+        };
+
+        // --- EXPORT JSON (BACKUP) ---
+        window.downloadAsJSON = () => {
+            toggleExportModal();
+            const dataStr = JSON.stringify(articlesList, null, 2);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Prerana_Magazine_Backup.json";
+            link.click();
+            showToast("JSON Backup Downloaded", "success");
         };
 
         // Image Helper
@@ -811,7 +895,7 @@
                         const cvs = document.createElement('canvas'); let w = img.width, h = img.height;
                         if(w>h && w>1000) { h*=1000/w; w=1000; } else if(h>1000) { w*=1000/h; h=1000; }
                         cvs.width=w; cvs.height=h; cvs.getContext('2d').drawImage(img,0,0,w,h);
-                        resolve(cvs.toDataURL('image/jpeg', 0.8)); // Higher quality for white theme
+                        resolve(cvs.toDataURL('image/jpeg', 0.8));
                     }
                 }
             });
@@ -819,5 +903,3 @@
     </script>
 </body>
 </html>
-
-
