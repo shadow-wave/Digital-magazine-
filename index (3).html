@@ -1,0 +1,530 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>സ്കൂൾ മാഗസിൻ - ലൈവ്</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@300;400;600;800&family=Noto+Serif+Malayalam:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root { --page-width-print: 210mm; --page-height-print: 297mm; }
+        body { font-family: 'Anek Malayalam', sans-serif; background-color: #f3f4f6; }
+        .font-serif-ml { font-family: 'Noto Serif Malayalam', serif; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        
+        /* Responsive Page Layout */
+        .page-a4 { 
+            width: 100%; 
+            max-width: 800px; /* Desktop width limit */
+            background: white; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); 
+            margin: 0 auto; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            border-radius: 8px;
+        }
+        
+        /* Typography & Columns - Mobile 1 Col, Desktop 2 Cols */
+        .magazine-columns { column-count: 1; text-align: justify; margin-top: 6mm; }
+        .magazine-columns p { margin-bottom: 4mm; line-height: 1.8; font-size: 11pt; color: #1f2937; }
+        .magazine-columns p:first-child { font-size: 12.5pt; font-weight: 600; color: #000; margin-bottom: 6mm; }
+        
+        @media (min-width: 768px) {
+            .magazine-columns { column-count: 2; column-gap: 8mm; }
+            .page-a4 { border-radius: 0; }
+        }
+
+        /* Print Settings (Forces exact A4 size & 2 Columns) */
+        @media print {
+            @page { size: A4; margin: 0; }
+            body { background: white; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; padding: 0; gap: 0; }
+            .page-a4 { width: var(--page-width-print); min-height: var(--page-height-print); box-shadow: none; margin: 0; page-break-after: always; page-break-inside: avoid; border-radius: 0; }
+            .magazine-columns { column-count: 2; column-gap: 8mm; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation (Sticky) -->
+    <nav class="sticky top-0 bg-gray-900 text-white shadow-lg z-50 flex justify-between items-center px-4 py-3 w-full no-print">
+        <div class="flex items-center gap-2 md:gap-3">
+            <i class="ph ph-books text-2xl md:text-3xl text-red-400"></i>
+            <h1 class="text-lg md:text-xl font-bold tracking-wide">സ്കൂൾ മാഗസിൻ</h1>
+        </div>
+        <div class="flex gap-2">
+            <button id="adminBtn" onclick="openAdminModal()" class="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded font-semibold transition flex items-center gap-2 text-sm md:text-base">
+                <i class="ph ph-shield-check text-lg text-green-400"></i> <span id="adminBtnText" class="hidden sm:inline">Admin Login</span>
+            </button>
+            <button onclick="window.print()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded font-semibold transition flex items-center gap-2 text-sm md:text-base shadow">
+                <i class="ph ph-printer text-lg"></i> <span class="hidden sm:inline">Print PDF</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Loading Overlay -->
+    <div id="loader" class="fixed inset-0 bg-white bg-opacity-90 z-[60] flex flex-col justify-center items-center hidden">
+        <i class="ph ph-spinner-gap text-5xl text-blue-600 animate-spin mb-3"></i>
+        <p class="font-bold text-gray-700 tracking-wide text-lg">ലോഡ് ചെയ്യുന്നു...</p>
+    </div>
+
+    <!-- Main Workspace (Natural Scrolling Layout) -->
+    <div class="flex-1 w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-4 md:p-6">
+        
+        <!-- Left Section: Form (Now scrollable with the page) -->
+        <aside class="w-full lg:w-1/3 xl:w-1/4 no-print flex-shrink-0">
+            <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden sticky top-20">
+                <div class="p-4 md:p-5 border-b border-gray-100 bg-blue-50/50">
+                    <h2 class="text-lg font-bold flex items-center gap-2 text-blue-900">
+                        <i class="ph ph-pencil-simple-line text-blue-600 text-xl"></i> രചനകൾ സമർപ്പിക്കുക
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1 leading-snug">നിങ്ങളുടെ സൃഷ്ടികൾ ഇവിടെ നൽകാം. എല്ലാം പൂരിപ്പിച്ച ശേഷം താഴെയുള്ള ബട്ടൺ അമർത്തുക.</p>
+                </div>
+                
+                <div class="p-4 md:p-5">
+                    <form id="magazineForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">വിഭാഗം</label>
+                            <select id="category" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-semibold transition">
+                                <option value="ലേഖനം">ലേഖനം</option>
+                                <option value="കഥ">കഥ</option>
+                                <option value="കവിത">കവിത</option>
+                                <option value="അനുഭവം">അനുഭവം</option>
+                                <option value="ചിത്രരചന">ചിത്രരചന</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">തലക്കെട്ട് <span class="text-red-500">*</span></label>
+                            <input type="text" id="title" placeholder="സൃഷ്ടിയുടെ പേര്" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold font-serif-ml text-lg transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">വിദ്യാർത്ഥിയുടെ പേര് & ക്ലാസ് <span class="text-red-500">*</span></label>
+                            <input type="text" id="author" placeholder="ഉദാ: അശ്വിൻ, ക്ലാസ് 10" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">ചിത്രം (ഓപ്ഷണൽ)</label>
+                            <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-blue-50 hover:border-blue-400 transition cursor-pointer bg-gray-50 group">
+                                <input type="file" id="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="pointer-events-none flex flex-col items-center">
+                                    <i class="ph ph-upload-simple text-3xl text-gray-400 group-hover:text-blue-500 mb-2 transition"></i>
+                                    <p class="text-sm text-gray-600 font-semibold" id="fileName">ചിത്രം അപ്‌ലോഡ് ചെയ്യുക</p>
+                                    <p class="text-xs text-gray-400 mt-1">ക്ലിക്ക് ചെയ്യുക</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">ഉള്ളടക്കം <span class="text-red-500">*</span></label>
+                            <textarea id="content" rows="6" placeholder="നിങ്ങളുടെ എഴുത്ത് ഇവിടെ ആരംഭിക്കുക..." class="w-full border-2 border-gray-200 rounded-lg p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white font-serif-ml text-sm leading-relaxed resize-none transition"></textarea>
+                        </div>
+                        
+                        <!-- Fixed Submit Button Issue -->
+                        <div class="pt-2">
+                            <button type="button" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-lg">
+                                <i class="ph ph-paper-plane-right text-xl"></i>
+                                സബ്മിറ്റ് ചെയ്യുക
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Section: Magazine Preview Area -->
+        <main class="w-full lg:w-2/3 xl:w-3/4 flex flex-col" id="printArea">
+            
+            <div id="pagesContainer" class="w-full flex flex-col items-center gap-6 md:gap-10 pb-10">
+                
+                <!-- Cover Page -->
+                <div class="page-a4 justify-center items-center bg-gray-900 text-white relative min-h-[500px] md:min-h-[297mm]">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
+                    <div class="absolute bottom-0 left-0 w-full h-4 bg-red-500"></div>
+                    
+                    <div class="p-8 md:p-[20mm] flex flex-col justify-center items-center text-center z-10 h-full">
+                        <p class="text-red-400 tracking-[0.2em] md:tracking-[0.3em] uppercase text-xs md:text-sm font-bold mb-4 font-playfair">School Magazine</p>
+                        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black mb-4 font-serif-ml leading-tight">തളിരുകൾ</h1>
+                        <div class="w-16 md:w-24 h-1 bg-white mx-auto my-6 md:my-8 opacity-50"></div>
+                        <h2 class="text-lg md:text-2xl text-gray-300 font-serif-ml font-light">വിദ്യാർത്ഥികളുടെ സർഗ്ഗസൃഷ്ടികൾ</h2>
+                        
+                        <div class="absolute bottom-10 md:bottom-20 flex justify-between w-full px-10 md:px-20 text-xs md:text-sm tracking-widest uppercase font-bold text-gray-400">
+                            <span>Volume 01</span>
+                            <span>2024 - 2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Pages will load here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[70] px-4 no-print backdrop-blur-sm transition-opacity">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl max-w-sm w-full transform transition-all">
+            <h3 class="text-xl md:text-2xl font-bold mb-2 flex items-center gap-2 text-gray-800"><i class="ph ph-shield-check text-green-500 text-3xl"></i> Admin Login</h3>
+            <p class="text-sm text-gray-500 mb-6">പേജുകളുടെ ക്രമം മാറ്റാനും ഡിലീറ്റ് ചെയ്യാനും പാസ്‌വേഡ് നൽകുക.</p>
+            <input type="password" id="adminPassword" placeholder="Enter Password" class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 mb-6 focus:outline-none focus:border-blue-500 font-mono text-lg">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeAdminModal()" class="px-5 py-2.5 text-gray-600 font-semibold hover:bg-gray-100 rounded-lg transition">Cancel</button>
+                <button onclick="loginAdmin()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-md">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Friendly Toast Notification -->
+    <div id="toast" class="fixed top-16 md:bottom-5 md:top-auto left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3.5 rounded-full shadow-2xl transition-all duration-300 opacity-0 -translate-y-10 md:translate-y-10 z-[100] flex items-center gap-3 w-[90%] md:w-auto max-w-md">
+        <i class="ph ph-info text-2xl" id="toastIcon"></i>
+        <span id="toastMsg" class="font-medium text-sm md:text-base leading-tight"></span>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyC-xd1hY9pLjN5KXdvhesDMRrjwRwj-fMk",
+          authDomain: "schoolmagazine-3a227.firebaseapp.com",
+          projectId: "schoolmagazine-3a227",
+          storageBucket: "schoolmagazine-3a227.firebasestorage.app",
+          messagingSenderId: "809998632823",
+          appId: "1:809998632823:web:703ebce93680af8de78372",
+          measurementId: "G-631XSZFLPQ"
+        };
+        
+        const myAppId = 'school-magazine-v1';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State Variables
+        let currentUser = null;
+        let articlesList = [];
+        let isAdmin = false;
+        const ADMIN_PASS = "admin123";
+
+        // DOM Elements
+        const pagesContainer = document.getElementById('pagesContainer');
+        const loader = document.getElementById('loader');
+        const imageInput = document.getElementById('image');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        // Update file name display
+        imageInput.addEventListener('change', function(e) {
+            fileNameDisplay.textContent = e.target.files[0] ? e.target.files[0].name : "ചിത്രം അപ്‌ലോഡ് ചെയ്യുക";
+            fileNameDisplay.classList.add('text-blue-600');
+        });
+
+        // Global Toast Function (Mobile optimized animations)
+        window.showToast = function(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMsg').innerText = msg;
+            
+            icon.className = isError ? "ph ph-warning-circle text-2xl text-red-400" : "ph ph-check-circle text-2xl text-green-400";
+            
+            toast.classList.remove('opacity-0', '-translate-y-10', 'md:translate-y-10');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-10', 'md:translate-y-10');
+            }, 3500);
+        }
+
+        // --- AUTHENTICATION ---
+        async function initApp() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Auth error:", error);
+                showToast("Connection error!", true);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                fetchArticles();
+            }
+        });
+
+        // --- FETCH DATA ---
+        function fetchArticles() {
+            if (!currentUser) return;
+            loader.classList.remove('hidden');
+
+            const articlesRef = collection(db, 'artifacts', myAppId, 'public', 'data', 'articles');
+            
+            onSnapshot(articlesRef, (snapshot) => {
+                articlesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                articlesList.sort((a, b) => a.order - b.order);
+                renderMagazine();
+                loader.classList.add('hidden');
+            }, (error) => {
+                console.error("Fetch error:", error);
+                showToast("Database connection failed", true);
+                loader.classList.add('hidden');
+            });
+        }
+
+        // --- RENDER MAGAZINE PAGES ---
+        function renderMagazine() {
+            // Remove existing dynamic pages, keep cover page
+            const existingPages = pagesContainer.querySelectorAll('.dynamic-page');
+            existingPages.forEach(p => p.remove());
+            
+            articlesList.forEach((article, index) => {
+                const pageNumStr = (index + 1).toString().padStart(2, '0');
+                
+                // Formatted Content
+                const paragraphsHTML = article.content.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p}</p>`).join('');
+                
+                // Formatted Image
+                const imageHtml = article.image 
+                    ? `<div class="w-full mt-4 mb-6 h-[200px] md:h-[280px] overflow-hidden rounded-lg"><img src="${article.image}" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-700"></div>` 
+                    : `<div class="w-full h-px bg-gray-200 mt-6 mb-8"></div>`;
+
+                // Mobile-Optimized Admin Controls
+                let adminControls = '';
+                if (isAdmin) {
+                    adminControls = `
+                        <div class="bg-blue-50 border-b border-blue-200 px-4 py-3 flex justify-between items-center no-print">
+                            <span class="text-xs font-bold text-blue-800 uppercase tracking-wider flex items-center gap-1"><i class="ph ph-wrench"></i> Admin Panel</span>
+                            <div class="flex gap-2">
+                                <button onclick="moveArticle('${article.id}', -1)" class="bg-white p-2 md:px-3 md:py-2 rounded-md shadow-sm border border-gray-200 text-blue-600 hover:bg-blue-100 transition flex items-center gap-1 font-bold" title="Move Up"><i class="ph ph-arrow-up text-lg"></i> <span class="hidden md:inline text-xs">Up</span></button>
+                                <button onclick="moveArticle('${article.id}', 1)" class="bg-white p-2 md:px-3 md:py-2 rounded-md shadow-sm border border-gray-200 text-blue-600 hover:bg-blue-100 transition flex items-center gap-1 font-bold" title="Move Down"><i class="ph ph-arrow-down text-lg"></i> <span class="hidden md:inline text-xs">Down</span></button>
+                                <div class="w-px bg-blue-200 mx-1"></div>
+                                <button onclick="deleteArticle('${article.id}')" class="bg-red-50 p-2 md:px-3 md:py-2 rounded-md shadow-sm border border-red-100 text-red-600 hover:bg-red-100 transition flex items-center gap-1 font-bold" title="Delete"><i class="ph ph-trash text-lg"></i> <span class="hidden md:inline text-xs">Delete</span></button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Create Page Element
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'page-a4 dynamic-page';
+                pageDiv.innerHTML = `
+                    ${adminControls}
+                    
+                    <!-- Header -->
+                    <div class="px-6 md:px-[20mm] pt-6 md:pt-[15mm] pb-2 md:pb-[5mm] border-b border-gray-900 flex justify-between items-end mt-2 md:mt-0">
+                        <span class="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-red-600">${article.category}</span>
+                        <span class="text-[10px] md:text-xs text-gray-400 font-playfair italic">Digital Edition</span>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="px-6 md:px-[20mm] py-4 md:py-[10mm] flex-grow flex flex-col">
+                        
+                        <div class="text-center md:px-10 mb-2">
+                            <h2 class="text-3xl md:text-5xl font-black text-gray-900 mb-3 md:mb-4 font-serif-ml leading-tight break-words">${article.title}</h2>
+                            <div class="flex items-center justify-center gap-2 md:gap-3 text-gray-600">
+                                <span class="w-6 md:w-8 h-[1px] bg-gray-400"></span>
+                                <p class="text-sm md:text-lg font-serif-ml italic">രചന: <span class="font-semibold text-gray-900">${article.author}</span></p>
+                                <span class="w-6 md:w-8 h-[1px] bg-gray-400"></span>
+                            </div>
+                        </div>
+                        
+                        ${imageHtml}
+                        
+                        <div class="magazine-columns font-serif-ml flex-grow">
+                            ${paragraphsHTML}
+                        </div>
+                        
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 md:px-[20mm] py-4 md:py-[10mm] flex justify-between items-center text-xs font-bold text-gray-400 font-playfair border-t border-gray-100 mt-auto">
+                        <span class="text-sm">Pg. ${pageNumStr}</span>
+                        <span class="tracking-widest uppercase text-gray-300">The Magazine</span>
+                    </div>
+                `;
+                
+                pagesContainer.appendChild(pageDiv);
+            });
+
+            // Empty State
+            if(articlesList.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'dynamic-page p-10 text-gray-400 text-center italic font-serif-ml text-lg mt-10 w-full no-print bg-white rounded-lg shadow-sm border border-dashed border-gray-300 max-w-2xl';
+                emptyMsg.innerHTML = 'ഇതുവരെ സൃഷ്ടികൾ ഒന്നും ലഭിച്ചിട്ടില്ല.<br><span class="text-sm mt-2 block">മുകളിലുള്ള ഫോം ഉപയോഗിച്ച് ആദ്യത്തെ രചന നൽകുക.</span>';
+                pagesContainer.appendChild(emptyMsg);
+            }
+        }
+
+        // --- SUBMIT NEW ARTICLE ---
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            if (!currentUser) return showToast('Please wait, connecting to server...', true);
+            
+            const category = document.getElementById('category').value;
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const content = document.getElementById('content').value.trim();
+
+            if (!title || !author || !content) {
+                return showToast('ചുവന്ന നക്ഷത്രം (*) ഉള്ള എല്ലാ കോളങ്ങളും പൂരിപ്പിക്കുക!', true);
+            }
+
+            loader.classList.remove('hidden');
+            
+            let base64Image = null;
+            if (imageInput.files.length > 0) {
+                base64Image = await compressImage(imageInput.files[0]);
+            }
+
+            try {
+                const articlesRef = collection(db, 'artifacts', myAppId, 'public', 'data', 'articles');
+                await addDoc(articlesRef, {
+                    category, 
+                    title, 
+                    author, 
+                    content,
+                    image: base64Image,
+                    order: Date.now()
+                });
+                
+                // Clear Form
+                document.getElementById('magazineForm').reset();
+                fileNameDisplay.textContent = "ചിത്രം അപ്‌ലോഡ് ചെയ്യുക";
+                fileNameDisplay.classList.remove('text-blue-600');
+                
+                showToast('നിങ്ങളുടെ സൃഷ്ടി വിജയകരമായി ചേർത്തു!');
+                
+                // Scroll down to view the new article (Works on mobile too)
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                showToast('സേവ് ചെയ്യാൻ സാധിച്ചില്ല. വീണ്ടും ശ്രമിക്കുക.', true);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+
+        // --- IMAGE COMPRESSOR ---
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                        } else {
+                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                        }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    };
+                };
+            });
+        }
+
+        // --- ADMIN CONTROLS ---
+        window.openAdminModal = () => {
+            document.getElementById('adminModal').classList.remove('hidden');
+            document.getElementById('adminPassword').focus();
+        };
+        
+        window.closeAdminModal = () => {
+            document.getElementById('adminModal').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+        };
+
+        window.loginAdmin = () => {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === ADMIN_PASS) {
+                isAdmin = true;
+                const btn = document.getElementById('adminBtn');
+                btn.classList.replace('bg-gray-800', 'bg-green-600');
+                btn.classList.replace('hover:bg-gray-700', 'hover:bg-green-700');
+                document.getElementById('adminBtnText').innerText = "Admin Active";
+                closeAdminModal();
+                showToast("Admin access granted!");
+                renderMagazine();
+            } else {
+                showToast("തെറ്റായ പാസ്‌വേഡ്!", true);
+            }
+        };
+
+        window.deleteArticle = async (id) => {
+            if (!currentUser || !isAdmin) return;
+            if(confirm("ഈ പേജ് മാഗസിനിൽ നിന്നും ഡിലീറ്റ് ചെയ്യണമെന്ന് ഉറപ്പാണോ?")) {
+                loader.classList.remove('hidden');
+                try {
+                    await deleteDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', id));
+                    showToast("പേജ് ഡിലീറ്റ് ചെയ്തു.");
+                } catch(e) { 
+                    console.error(e); 
+                    showToast("Error deleting page", true);
+                }
+                loader.classList.add('hidden');
+            }
+        };
+
+        window.moveArticle = async (id, direction) => {
+            if (!currentUser || !isAdmin) return;
+            
+            const index = articlesList.findIndex(a => a.id === id);
+            if (index === -1) return;
+            
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= articlesList.length) return;
+
+            loader.classList.remove('hidden');
+            try {
+                const currentDoc = articlesList[index];
+                const targetDoc = articlesList[targetIndex];
+
+                const tempOrder = currentDoc.order;
+                
+                await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', currentDoc.id), { order: targetDoc.order });
+                await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', targetDoc.id), { order: tempOrder });
+                
+                // Scroll to the moved element after a short delay
+                setTimeout(() => {
+                    window.scrollBy({ top: direction * 300, behavior: 'smooth' });
+                }, 500);
+
+            } catch (e) {
+                console.error(e);
+                showToast("ക്രമം മാറ്റാൻ സാധിച്ചില്ല", true);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        };
+
+        initApp();
+    </script>
+</body>
+</html>
+
+
