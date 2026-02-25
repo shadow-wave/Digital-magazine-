@@ -16,18 +16,20 @@
     <!-- Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+    <!-- HTML2PDF Library for High-Quality PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'navy': '#0f172a',      // Deep sophisticated navy for main text/headers
+                        'navy': '#0f172a',      
                         'navy-light': '#1e293b',
-                        'gold': '#c29a5b',      // Elegant subtle gold for accents
+                        'gold': '#c29a5b',      
                         'gold-light': '#dfc28f',
-                        'paper': '#ffffff',     // Pure white for crisp contrast
-                        'paper-alt': '#fafafa', // Slightly off-white for blocks
-                        'ink': '#334155',       // Soft black for body text
+                        'paper': '#ffffff',     
+                        'ink': '#334155',       
                     },
                     fontFamily: {
                         'hindi': ['"Noto Serif Devanagari"', 'serif'],
@@ -53,23 +55,29 @@
         .page-wrapper {
             width: 100%; 
             max-width: 800px;
-            aspect-ratio: 210/297;
-            background-color: #ffffff; /* Pure White */
+            background-color: #ffffff; 
             box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.15);
             margin: 0 auto; 
             position: relative; 
             display: flex; 
             flex-direction: column; 
-            border-radius: 2px;
+            border-radius: 4px;
+            overflow: hidden;
         }
 
         /* Inner Content Area */
         .page-inner {
-            margin: 20mm; /* Generous white space */
+            margin: 20mm; 
             flex-grow: 1;
             position: relative;
             display: flex;
             flex-direction: column;
+            min-height: 250mm;
+        }
+
+        /* Adjust margin when Admin Toolbar is visible */
+        .admin-active .page-inner {
+            margin-top: 25mm !important;
         }
 
         /* Typography & Columns */
@@ -88,7 +96,7 @@
             color: #0f172a; font-weight: 900; font-family: 'Playfair Display', serif;
         }
 
-        /* Doha Layout - Minimal & Elegant */
+        /* Doha Layout */
         .doha-block {
             position: relative; padding: 2rem 0; margin: 2.5rem 0; text-align: center;
             border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
@@ -103,22 +111,19 @@
             margin-bottom: 0.8rem !important; font-family: 'Noto Serif Devanagari', serif; line-height: 1.9;
         }
 
-        /* Translation Layout - Clean Separation */
-        .trans-block {
-            margin-bottom: 2rem; padding-left: 1.5rem; border-left: 2px solid #c29a5b;
-            break-inside: avoid;
-        }
+        /* Translation Layout */
+        .trans-block { margin-bottom: 2rem; padding-left: 1.5rem; border-left: 2px solid #c29a5b; break-inside: avoid; }
         .trans-block .hi { font-size: 13pt; font-weight: 600; color: #0f172a; font-family: 'Noto Serif Devanagari', serif; margin-bottom: 8px; line-height: 1.5;}
         .trans-block .ml { font-size: 11pt; color: #64748b; font-family: 'Anek Malayalam', sans-serif; line-height: 1.6;}
 
-        /* Image Formatting - No borders, just clean integration */
+        /* Image Formatting */
         .img-editorial { margin-bottom: 2rem; background: white; }
         .img-editorial img { border-radius: 2px; }
         .pos-left { float: left; margin-right: 25px; width: 45%; shape-outside: margin-box; }
         .pos-right { float: right; margin-left: 25px; width: 45%; shape-outside: margin-box; }
         .pos-top { width: 100%; margin-bottom: 2.5rem; } .pos-bottom { width: 100%; margin-top: 2.5rem; margin-bottom: 0;}
 
-        /* Form UI - Modern Minimal */
+        /* Form UI */
         .glass-input { 
             width: 100%; padding: 0.85rem 1rem; border: 1px solid #cbd5e1; border-radius: 6px; 
             background-color: #ffffff; font-family: 'Noto Serif Devanagari', serif; 
@@ -129,7 +134,8 @@
         /* Mobile Layout tweaks */
         @media (max-width: 768px) {
             .page-wrapper { width: 96%; aspect-ratio: auto; min-height: 600px; }
-            .page-inner { margin: 25px; }
+            .page-inner { margin: 25px; min-height: auto; }
+            .admin-active .page-inner { margin-top: 80px !important; }
             .editorial-columns { column-count: 1; }
             .pos-left, .pos-right { float: none; width: 100%; margin: 0 0 2rem 0; }
         }
@@ -139,25 +145,26 @@
         /* --- PERFECT PRINT STYLES --- */
         @media print {
             @page { size: A4; margin: 0; }
-            body { background: #ffffff !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            html, body { height: auto !important; overflow: visible !important; display: block !important; background: #ffffff !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             
-            body > *:not(#printArea), nav, aside, .no-print, #adminModal, #toast, #loader, #editModal { display: none !important; }
-            #printArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+            nav, aside, .no-print, #adminModal, #toast, #loader, #editModal, .admin-toolbar { display: none !important; }
+            
+            .flex-1, .flex-col, .lg\:flex-row { display: block !important; }
+            #printArea { position: static !important; display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            #pagesContainer { display: block !important; width: 100% !important; gap: 0 !important; }
             
             .page-wrapper { 
-                width: 210mm !important; height: 297mm !important; margin: 0 !important; 
-                box-shadow: none !important; border-radius: 0 !important; 
-                background-color: #ffffff !important; 
-                page-break-after: always !important; break-after: always !important;
-                border: none !important;
+                position: relative !important; width: 210mm !important; height: 297mm !important; 
+                margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; 
+                background-color: #ffffff !important; page-break-after: always !important; 
+                break-after: page !important; border: none !important; float: none !important;
             }
-            .page-inner { margin: 25mm 20mm 25mm 20mm !important; }
+            .page-inner { margin: 25mm 20mm 25mm 20mm !important; min-height: auto !important;}
+            .admin-active .page-inner { margin-top: 25mm !important; } /* Reset margin for print */
+
             .editorial-columns { column-count: 2 !important; column-gap: 12mm !important; }
-            
             .pos-left { float: left !important; width: 45% !important; margin-right: 8mm !important; }
             .pos-right { float: right !important; width: 45% !important; margin-left: 8mm !important; }
-            
-            .cover-page { background-color: #ffffff !important; }
         }
 
         .fade-in { animation: fadeIn 0.5s ease-out; }
@@ -176,15 +183,37 @@
                     <p class="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-[0.2em] font-eng mt-1">Literary Magazine</p>
                 </div>
             </div>
-            <div class="flex gap-3 items-center">
-                <button id="adminBtn" onclick="openAdminModal()" class="p-2 text-gray-400 hover:text-navy transition rounded-full hover:bg-gray-100" title="Admin">
+            
+            <!-- Action Buttons -->
+            <div class="flex gap-2 md:gap-3 items-center flex-wrap justify-end">
+                
+                <!-- Admin Status Indicator -->
+                <div id="adminStatusBadge" class="hidden items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full text-xs font-bold mr-2">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    Admin Active
+                </div>
+
+                <button id="adminBtn" onclick="openAdminModal()" class="p-2 text-gray-400 hover:text-navy transition rounded-full hover:bg-gray-100" title="Admin Login">
                     <i class="ph ph-shield-check text-xl"></i>
                 </button>
-                <button id="wordBtn" onclick="downloadAsWord()" class="hidden border border-gray-300 hover:bg-gray-50 text-navy px-4 py-1.5 rounded text-sm font-bold flex items-center gap-2 transition">
-                    <i class="ph ph-file-doc text-lg"></i> <span class="hidden sm:inline">Export Word</span>
+                
+                <button id="logoutBtn" onclick="logoutAdmin()" class="hidden p-2 text-red-400 hover:text-red-600 transition rounded-full hover:bg-red-50" title="Logout Admin">
+                    <i class="ph ph-sign-out text-xl"></i>
                 </button>
-                <button onclick="window.print()" class="bg-navy hover:bg-navy-light text-white px-5 py-1.5 rounded text-sm font-bold flex items-center gap-2 transition shadow-md">
-                    <i class="ph ph-printer text-lg"></i> <span class="hidden sm:inline">Print Magazine</span>
+
+                <button id="wordBtn" onclick="downloadAsWord()" class="hidden border border-gray-300 hover:bg-gray-50 text-navy px-3 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition" title="Export to MS Word">
+                    <i class="ph ph-file-doc text-lg"></i> <span class="hidden sm:inline">Word</span>
+                </button>
+                
+                <button onclick="downloadPDF()" class="bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition shadow-sm" title="High Quality PDF">
+                    <i class="ph ph-download-simple text-lg"></i> <span class="hidden md:inline">Download PDF</span>
+                </button>
+                
+                <button onclick="window.print()" class="bg-navy hover:bg-navy-light text-white px-4 py-1.5 rounded text-xs font-bold flex items-center gap-2 transition shadow-md">
+                    <i class="ph ph-printer text-lg"></i> <span class="hidden md:inline">Print</span>
                 </button>
             </div>
         </div>
@@ -210,7 +239,6 @@
                 
                 <div id="formContainer" class="p-6 hidden lg:block space-y-5">
                     <form id="magazineForm" class="space-y-4">
-                        
                         <div>
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">श्रेणी (Category)</label>
                             <select id="category" class="glass-input cursor-pointer appearance-none font-bold text-navy">
@@ -271,10 +299,7 @@
                 
                 <!-- Minimalist Cover Page -->
                 <div class="page-wrapper cover-page bg-white justify-center items-center relative overflow-hidden border-8 border-navy m-2">
-                    
-                    <!-- Clean Inner Border -->
                     <div class="absolute inset-4 border border-gray-200 z-10 pointer-events-none"></div>
-                    
                     <div class="z-20 text-center flex flex-col items-center w-full h-full justify-center px-12 py-20 bg-white">
                         
                         <div class="mb-10">
@@ -495,22 +520,31 @@
                     contentHtml = `<div class="editorial-columns drop-cap">${imgHtml}${lines}</div>`;
                 }
 
-                let adminTools = '';
+                // Dedicated Full-Width Admin Toolbar per page
+                let adminBar = '';
+                let adminClass = '';
                 if(isAdmin) {
-                    adminTools = `
-                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-2 py-1 z-50 flex gap-2 rounded border border-gray-200 shadow-sm no-print opacity-20 hover:opacity-100 transition-opacity">
-                        <button onclick="moveArticle('${article.id}', -1)" class="hover:text-navy text-gray-500"><i class="ph ph-arrow-up"></i></button>
-                        <button onclick="moveArticle('${article.id}', 1)" class="hover:text-navy text-gray-500"><i class="ph ph-arrow-down"></i></button>
-                        <div class="w-px bg-gray-200 my-1"></div>
-                        <button onclick="openEditModal('${article.id}')" class="hover:text-gold text-gray-500"><i class="ph ph-pencil-simple"></i></button>
-                        <button onclick="deleteArticle('${article.id}')" class="hover:text-red-600 text-gray-500"><i class="ph ph-trash"></i></button>
+                    adminClass = 'admin-active';
+                    adminBar = `
+                    <div class="admin-toolbar absolute top-0 left-0 w-full bg-navy/95 backdrop-blur text-white px-4 py-2.5 flex flex-wrap justify-between items-center no-print z-[60] border-b-2 border-gold shadow-md">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-wrench text-gold text-lg"></i>
+                            <span class="text-xs font-bold uppercase tracking-widest text-white">Admin Controls (Pg ${index + 1})</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-2 md:mt-0">
+                            <button onclick="moveArticle('${article.id}', -1)" title="Move Up" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded text-xs flex items-center gap-1 transition font-semibold"><i class="ph ph-arrow-up text-gold"></i> <span class="hidden sm:inline">Up</span></button>
+                            <button onclick="moveArticle('${article.id}', 1)" title="Move Down" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded text-xs flex items-center gap-1 transition font-semibold"><i class="ph ph-arrow-down text-gold"></i> <span class="hidden sm:inline">Down</span></button>
+                            <div class="w-px h-5 bg-white/20 mx-2"></div>
+                            <button onclick="openEditModal('${article.id}')" title="Edit Page" class="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 rounded text-xs flex items-center gap-1 transition font-bold border border-blue-500/30"><i class="ph ph-pencil-simple"></i> Edit</button>
+                            <button onclick="deleteArticle('${article.id}')" title="Delete Page" class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded text-xs flex items-center gap-1 transition font-bold border border-red-500/30"><i class="ph ph-trash"></i> Delete</button>
+                        </div>
                     </div>`;
                 }
 
                 const page = document.createElement('div');
-                page.className = 'page-wrapper fade-in';
+                page.className = `page-wrapper fade-in ${adminClass}`;
                 page.innerHTML = `
-                    ${adminTools}
+                    ${adminBar}
                     <div class="page-inner">
                         
                         <!-- Header -->
@@ -528,7 +562,7 @@
                         </div>
 
                         <!-- Content Flow -->
-                        <div class="flex-1 overflow-hidden">
+                        <div class="flex-1 overflow-hidden relative">
                             ${contentHtml}
                         </div>
 
@@ -574,29 +608,71 @@
         // Admin Access
         window.openAdminModal = () => { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminPassword').focus(); };
         window.closeAdminModal = () => { document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminPassword').value = ''; };
+        
         window.loginAdmin = () => {
             if(document.getElementById('adminPassword').value === "admin123") {
                 isAdmin = true;
                 closeAdminModal();
+                
+                // Update UI for Logged In state
+                document.getElementById('adminBtn').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                document.getElementById('adminStatusBadge').classList.remove('hidden');
+                document.getElementById('adminStatusBadge').classList.add('flex');
                 document.getElementById('wordBtn').classList.remove('hidden');
-                document.getElementById('adminBtn').classList.replace('text-gray-400', 'text-navy');
+                
                 renderMagazine();
-                showToast("Admin Access Granted", "success");
+                showToast("Admin Mode Activated", "success");
             } else showToast("Wrong Password", "error");
+        };
+
+        window.logoutAdmin = () => {
+            isAdmin = false;
+            document.getElementById('adminBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('adminStatusBadge').classList.add('hidden');
+            document.getElementById('adminStatusBadge').classList.remove('flex');
+            document.getElementById('wordBtn').classList.add('hidden');
+            renderMagazine();
+            showToast("Logged out successfully");
         };
 
         // Actions
         window.deleteArticle = async (id) => {
-            if(confirm("Are you sure?")) { toggleLoader(true); await deleteDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', id)); toggleLoader(false); showToast("Deleted", "success");}
+            if(!isAdmin) return showToast("Admin access required!", "error");
+            
+            if(confirm("क्या आप वाकई इस पेज को डिलीट करना चाहते हैं? (Are you sure you want to permanently delete this page?)")) { 
+                toggleLoader(true, "Deleting page..."); 
+                try {
+                    const docRef = doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', id);
+                    await deleteDoc(docRef); 
+                    showToast("Page deleted successfully", "success");
+                } catch(error) {
+                    console.error("Delete Error:", error);
+                    showToast("Failed to delete. Check Firebase Rules.", "error");
+                } finally {
+                    toggleLoader(false); 
+                }
+            }
         };
+
         window.moveArticle = async (id, dir) => {
+            if(!isAdmin) return;
             const idx = articlesList.findIndex(a=>a.id===id);
             if(idx+dir >= 0 && idx+dir < articlesList.length) {
-                toggleLoader(true);
-                const a = articlesList[idx], b = articlesList[idx+dir];
-                const temp = a.order;
-                await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', a.id), {order: b.order});
-                await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', b.id), {order: temp});
+                toggleLoader(true, "Rearranging...");
+                try {
+                    const doc1 = articlesList[idx], doc2 = articlesList[idx+dir];
+                    
+                    let newOrder1 = doc2.order;
+                    let newOrder2 = doc1.order;
+                    if(newOrder1 === newOrder2) newOrder1 += (dir * 10); 
+
+                    await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', doc1.id), {order: newOrder1});
+                    await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', doc2.id), {order: newOrder2});
+                } catch(e) {
+                    showToast("Error moving page", "error");
+                }
                 toggleLoader(false);
             }
         };
@@ -604,6 +680,7 @@
         // Edit
         let editImgOriginal = null;
         window.openEditModal = (id) => {
+            if(!isAdmin) return;
             const a = articlesList.find(x=>x.id===id);
             document.getElementById('editArticleId').value = a.id;
             document.getElementById('editCategory').value = a.category;
@@ -633,37 +710,64 @@
         });
 
         window.saveEditArticle = async () => {
-            toggleLoader(true);
+            if(!isAdmin) return;
+            toggleLoader(true, "Updating Page...");
             const id = document.getElementById('editArticleId').value;
             const status = document.getElementById('editImageStatus').value;
             let img = editImgOriginal;
             if(status === 'remove') img = null;
             if(status === 'change') img = await compressImage(document.getElementById('editImage').files[0]);
 
-            await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', id), {
-                category: document.getElementById('editCategory').value, title: document.getElementById('editTitle').value,
-                author: document.getElementById('editAuthor').value, content: document.getElementById('editContent').value,
-                imgPos: document.getElementById('editImgPos').value, image: img
-            });
-            closeEditModal(); toggleLoader(false); showToast("Saved!", "success");
+            try {
+                await updateDoc(doc(db, 'artifacts', myAppId, 'public', 'data', 'articles', id), {
+                    category: document.getElementById('editCategory').value, title: document.getElementById('editTitle').value,
+                    author: document.getElementById('editAuthor').value, content: document.getElementById('editContent').value,
+                    imgPos: document.getElementById('editImgPos').value, image: img
+                });
+                closeEditModal(); 
+                showToast("Changes Saved!", "success");
+            } catch(e) {
+                showToast("Error updating page", "error");
+            }
+            toggleLoader(false); 
         };
 
-        // Export/Helpers
-        function compressImage(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader(); reader.readAsDataURL(file);
-                reader.onload = e => {
-                    const img = new Image(); img.src = e.target.result;
-                    img.onload = () => {
-                        const cvs = document.createElement('canvas'); let w = img.width, h = img.height;
-                        if(w>h && w>1000) { h*=1000/w; w=1000; } else if(h>1000) { w*=1000/h; h=1000; }
-                        cvs.width=w; cvs.height=h; cvs.getContext('2d').drawImage(img,0,0,w,h);
-                        resolve(cvs.toDataURL('image/jpeg', 0.8)); // Higher quality for white theme
-                    }
-                }
-            });
-        }
+        // --- EXPORT PDF USING HTML2PDF (HIGH QUALITY) ---
+        window.downloadPDF = () => {
+            toggleLoader(true, "Generating PDF...");
+            const element = document.getElementById('pagesContainer');
+            
+            // Hide Admin tools before generating PDF
+            const adminBars = document.querySelectorAll('.admin-toolbar');
+            adminBars.forEach(bar => bar.style.display = 'none');
+            
+            // Remove margin-top offset for printing
+            const wrappers = document.querySelectorAll('.page-wrapper');
+            wrappers.forEach(w => w.classList.remove('admin-active'));
 
+            const opt = {
+                margin:       0,
+                filename:     'Prerana_Magazine_2025.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore Admin tools
+                adminBars.forEach(bar => bar.style.display = 'flex');
+                if(isAdmin) wrappers.forEach(w => w.classList.add('admin-active'));
+                toggleLoader(false);
+                showToast("PDF Downloaded successfully!", "success");
+            }).catch(err => {
+                adminBars.forEach(bar => bar.style.display = 'flex');
+                if(isAdmin) wrappers.forEach(w => w.classList.add('admin-active'));
+                toggleLoader(false);
+                showToast("Error creating PDF", "error");
+            });
+        };
+
+        // --- EXPORT WORD (TEXT ONLY/BASIC IMAGES) ---
         window.downloadAsWord = () => {
             let html = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><style>body{font-family:'Lora', 'Mangal', serif;} .title{color:#0f172a;font-size:28pt;font-weight:bold;text-align:center; margin-bottom:5px;} .author{text-align:center;font-style:italic; color:#64748b; margin-bottom:30px; font-size:12pt} .cat{color:#c29a5b;font-weight:bold; border-bottom:1px solid #e2e8f0; padding-bottom:5px; text-transform:uppercase; font-size:10pt}</style></head><body>`;
             
@@ -694,8 +798,24 @@
             });
             html += `</body></html>`;
             const b = new Blob(['\ufeff', html], {type:'application/msword'});
-            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Prerana_Magazine_White_Theme.doc"; a.click();
+            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Prerana_Magazine_Word_Export.doc"; a.click();
         };
+
+        // Image Helper
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = e => {
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = () => {
+                        const cvs = document.createElement('canvas'); let w = img.width, h = img.height;
+                        if(w>h && w>1000) { h*=1000/w; w=1000; } else if(h>1000) { w*=1000/h; h=1000; }
+                        cvs.width=w; cvs.height=h; cvs.getContext('2d').drawImage(img,0,0,w,h);
+                        resolve(cvs.toDataURL('image/jpeg', 0.8)); // Higher quality for white theme
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
